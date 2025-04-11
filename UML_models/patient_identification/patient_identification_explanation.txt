@@ -1,0 +1,8 @@
+Cardiovascular Health Monitoring System (CHMS)
+Subsystem: Patient Identification System
+
+The Patient Identification System ensures that each piece of incoming data is linked to the correct patient.
+
+- PatientIdentifier: Matches incoming records with registered hospital patient data.
+- PatientRecord: Stores patient identity and medical info securely.
+- IdentityManager: Oversees matching and handles mismatches or invalid IDs.

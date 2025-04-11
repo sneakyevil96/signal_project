@@ -1,0 +1,10 @@
+Cardiovascular Health Monitoring System (CHMS)
+Subsystem: Alert Generation System
+
+The Alert Generation System in the CHMS is responsible for monitoring patient data in real time and generating alerts when abnormal health indicators are detected. This UML class diagram includes five key classes with clearly defined roles and relationships.
+
+- AlertGenerator: Evaluates incoming patient data and compares it to personalized thresholds.
+- ThresholdRule: Defines per-patient conditions (e.g. heart rate > 130 bpm) in a reusable way.
+- Alert: Encapsulates alert information such as condition, patient ID, and timestamp.
+- AlertManager: Routes and dispatches alerts to medical staff or systems.
+- Patient: Links threshold rules to actual patient identifiers.

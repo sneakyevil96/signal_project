@@ -1,0 +1,9 @@
+Cardiovascular Health Monitoring System (CHMS)
+Subsystem: Data Access Layer
+
+The Data Access Layer receives real-time data from various sources (TCP, WebSocket, Files) and standardizes it for internal use.
+
+- DataListener (interface): Defines listening behavior for any data input stream.
+- TCPDataListener / WebSocketDataListener / FileDataListener: Handle data input per protocol.
+- DataParser: Parses raw input (JSON, CSV, etc.) into structured format.
+- DataSourceAdapter: Sends parsed data to storage or processing systems.

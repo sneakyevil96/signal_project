@@ -60,6 +60,21 @@ java -jar target/cardio_generator-1.0-SNAPSHOT.jar --patient-count 100 --output 
 - `websocket:<port>`: Streams the simulated data to WebSocket clients connected to the specified port.
 - `tcp:<port>`: Streams the simulated data to TCP clients connected to the specified port.
 
+## UML Models
+
+This project includes UML class diagrams for the Cardiovascular Health Monitoring System (CHMS), modeled as part of a software engineering assignment.
+
+You can find the UML models here: [UML_models/](./uml_models)
+
+Each of the following subsystems is modeled with a class diagram and a design explanation:
+
+- **Alert Generation System** – Monitors patient data and triggers alerts based on thresholds.
+- **Data Storage System** – Stores and retrieves timestamped patient health data securely.
+- **Patient Identification System** – Matches incoming data with hospital patient records.
+- **Data Access Layer** – Receives and parses real-time input from TCP, WebSocket, or file sources.
+
+These models follow standard UML conventions and are designed with modularity and scalability in mind.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

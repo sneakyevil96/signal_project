@@ -1,0 +1,9 @@
+Cardiovascular Health Monitoring System (CHMS)
+Subsystem: Data Storage System
+
+The Data Storage System stores real-time health data securely for future access and analysis. It focuses on timestamped patient records and access control.
+
+- DataStorage: Manages saving, updating, and deleting incoming data.
+- PatientData: Represents one vital sign snapshot (e.g. HR, BP) with timestamp.
+- Patient: Links stored data to a real patient with secure identifiers.
+- DataRetriever: Supports authorized retrieval of historical data by medical staff.
