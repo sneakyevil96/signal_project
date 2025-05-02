@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataStorage {
-    private List<PatientRecord> records; // List to store patient records
+    private final List<PatientRecord> records; // List to store patient records
 
     public DataStorage(Object reader) {
         this.records = new ArrayList<>(); // Initialize the records list
-        // Optionally, initialize the reader if needed
+        reader = new Object();
+        // Optionally, initialize the reader if needed (done it!)
     }
 
     // Method to add patient data
@@ -22,9 +23,7 @@ public class DataStorage {
         List<PatientRecord> filteredRecords = new ArrayList<>();
 
         for (PatientRecord record : records) {
-            if (record.getPatientId() == patientId &&
-                    record.getTimestamp() >= startTime &&
-                    record.getTimestamp() <= endTime) {
+            if (record.getPatientId() == patientId && record.getTimestamp() >= startTime && record.getTimestamp() <= endTime) {
                 filteredRecords.add(record); // Add matching records to the filtered list
             }
         }
