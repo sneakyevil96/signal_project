@@ -18,8 +18,9 @@ public class ECGDataGenerator implements PatientDataGenerator {
     }
 
     @Override
-    public void generate(int patientId, OutputStrategy outputStrategy) {
-        // TODO Check how realistic this data is and make it more realistic if necessary
+    public ECGData generate(int patientId, OutputStrategy outputStrategy) { // TODO Check how realistic this data is and make it more realistic if necessary
+        AlertGenerator data = new AlertGenerator(dataStorage);
+
         try {
             double ecgValue = simulateEcgWaveform(patientId, lastEcgValues[patientId]);
             outputStrategy.output(patientId, System.currentTimeMillis(), "ECG", Double.toString(ecgValue));
@@ -28,6 +29,7 @@ public class ECGDataGenerator implements PatientDataGenerator {
             System.err.println("An error occurred while generating ECG data for patient " + patientId);
             e.printStackTrace(); // This will print the stack trace to help identify where the error occurred.
         }
+        return data;
     }
 
     private double simulateEcgWaveform(int patientId, double lastEcgValue) {

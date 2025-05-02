@@ -1,7 +1,9 @@
 package com.alerts;
-
+import com.cardio_generator.outputs.OutputStrategy;
 import com.data_management.DataStorage;
 import com.data_management.Patient;
+import com.cardio_generator.generators.ECGDataGenerator;
+import java.io.Console;
 
 /**
  * The {@code AlertGenerator} class is responsible for monitoring patient data
@@ -35,7 +37,20 @@ public class AlertGenerator {
      * @param patient the patient data to evaluate for alert conditions
      */
     public void evaluateData(Patient patient) {
-        // Implementation goes here
+/*
+Trend Alert: Trigger an alert if the patient's blood pressure (systolic or diastolic) shows a consistent increase or decrease across three consecutive readings where each reading changes by more than 10 mmHg from the last.
+Critical Threshold Alert: Trigger an alert if the systolic blood pressure exceeds 180 mmHg or drops below 90 mmHg, or if diastolic blood pressure exceeds 120 mmHg or drops below 60 mmHg.
+ */
+        ECGDataGenerator ecg = new ECGDataGenerator(1);
+
+        OutputStrategy ConsoleOutputStrategy = new OutputStrategy() {
+            @Override
+            public void output(int patientId, long timestamp, String label, String data) {
+            }
+        };
+        if(ecg.generate(1, ConsoleOutputStrategy) > 180 || ecg.generate(1, ConsoleOutputStrategy) < 90){
+           System.out.println("");
+        }
     }
 
     /**
