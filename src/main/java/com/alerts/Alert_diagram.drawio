@@ -1,0 +1,76 @@
+<mxfile host="65bd71144e">
+    <diagram id="vUWRee8I_Ep-nbXbqHVL" name="Page-1">
+        <mxGraphModel dx="1392" dy="959" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="Alert" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="20" y="40" width="330" height="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="" style="endArrow=none;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=0.976;entryY=-0.019;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="2" target="8">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="90" as="sourcePoint"/>
+                        <mxPoint x="280" y="90" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="100" y="90"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4" value="- patientId: String" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry y="20" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="- condition: String" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry x="-5" y="40" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="- timestamp: long" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry x="-5" y="60" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;+ Alert (patientId: String, condition: String, timestamp: long)&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry x="-5" y="90" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;+ getPatientId(): String&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry y="120" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="+ getCondition(): String" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry y="150" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;+ getPatientId(): String&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry y="120" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="+ getTimestamp(): long" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
+                    <mxGeometry y="180" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="AlertGenerator" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="490" y="40" width="340" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="" style="endArrow=none;html=1;" edge="1" parent="14">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="60" as="sourcePoint"/>
+                        <mxPoint x="340" y="60" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="- dataStorage: DataStorage" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="14">
+                    <mxGeometry y="30" width="170" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="+ AlertGenerator (dataStorage: DataStorage)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="14">
+                    <mxGeometry y="70" width="260" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="+ evaluateData (patient: Patient): void" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="14">
+                    <mxGeometry y="100" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="- triggerAlert (alert: Alert): void" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="14">
+                    <mxGeometry y="130" width="180" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="488" y="119" as="sourcePoint"/>
+                        <mxPoint x="350" y="119.5" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="480" y="120"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
