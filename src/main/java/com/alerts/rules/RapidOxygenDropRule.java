@@ -36,7 +36,7 @@ public class RapidOxygenDropRule implements AlertRule {
                 long timeDiff = compareRecord.getTimestamp() - baseTime;
 
                 if (timeDiff > TIME_WINDOW_MS) {
-                    break; // stop checking once outside 10 min window
+                    break;
                 }
 
                 double drop = baseValue - compareRecord.getMeasurementValue();
@@ -46,7 +46,7 @@ public class RapidOxygenDropRule implements AlertRule {
                             "(!) Rapid oxygen drop detected: " + drop + "% in under 10 minutes",
                             compareRecord.getTimestamp()
                     ));
-                    break; // avoid multiple alerts for same base point
+                    break;
                 }
             }
         }

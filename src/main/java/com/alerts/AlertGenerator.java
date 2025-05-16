@@ -14,7 +14,6 @@ public class AlertGenerator {
         this.alertRules = alertRules;
         this.alertDispatcher = dispatcher;
     }
-
     public void evaluateAllPatients() {
         for (Patient patient : dataStorage.getAllPatients()) {
             for (AlertRule rule : alertRules) {

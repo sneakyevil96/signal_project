@@ -69,7 +69,5 @@ public class Patient {
             }
         }
         return filtered;
-        // WARNING, getRecords IS MANUALLY IMPLEMENTED, NOT GIVEN.
     }
-
 }
