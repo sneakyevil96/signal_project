@@ -1,7 +1,11 @@
 package com.data_management;
 
+import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * A simple batch (stdin) reader.  Does *not* support streaming.
+ */
 public class DataParser implements DataReader {
 
     @Override
@@ -20,5 +24,13 @@ public class DataParser implements DataReader {
 
             dataStorage.addPatientData(id, value, type, timestamp);
         }
+    }
+
+    @Override
+    public void streamData(DataStorage storage, String websocketUri) throws IOException {
+        // batch parser does not support streaming
+        throw new UnsupportedOperationException(
+                "DataParser only supports batch readData(); use WebSocketDataReader for streaming"
+        );
     }
 }

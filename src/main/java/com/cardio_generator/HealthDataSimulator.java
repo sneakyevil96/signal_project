@@ -34,6 +34,9 @@ import com.cardio_generator.outputs.TcpOutputStrategy;
 import com.cardio_generator.outputs.WebSocketOutputStrategy;
 
 import com.data_management.DataStorage;
+import com.data_management.WebSocketDataReader;
+import com.data_management.DataReader;
+import com.data_management.DataParser;
 
 public class HealthDataSimulator {
 
@@ -45,14 +48,16 @@ public class HealthDataSimulator {
     }
 
     // --- Instance fields ---
-    private int patientCount = 50;
+    private int patientCount    = 50;
+    private String inputMode    = "websocket";     // "batch" or "websocket"
+    private String websocketUri = "ws://localhost:8080";
     private ScheduledExecutorService scheduler;
     private OutputStrategy baseOutputStrategy = new ConsoleOutputStrategy();
     private final Random random = new Random();
 
     /**
      * Wraps any OutputStrategy so that, in addition to emitting,
-     * we also feed all non-Alert records into our DataStorage.
+     * we also feed all non‐Alert records into our DataStorage.
      */
     private class CompositeOutputStrategy implements OutputStrategy {
         private final OutputStrategy delegate;
@@ -72,15 +77,15 @@ public class HealthDataSimulator {
         }
     }
 
-    /**
-     * Entry point: just hands off to the singleton instance.
-     */
+    /** Entry point */
     public static void main(String[] args) throws IOException {
+        System.out.println(">>> HealthDataSimulator starting up…");
         getInstance().start(args);
     }
 
     /**
-     * Configures everything, schedules generators & the rule engine.
+     * Configures everything, optionally ingests batch or real‐time data,
+     * then schedules generators and the rule engine.
      */
     public void start(String[] args) throws IOException {
         parseArguments(args);
@@ -88,7 +93,28 @@ public class HealthDataSimulator {
         // 1) singleton DataStorage
         DataStorage storage = DataStorage.getInstance();
 
-        // 2) Build rule engine with Strategy + Decorator
+        // 2) ingest data
+        if ("batch".equalsIgnoreCase(inputMode)) {
+            System.out.println("Batch mode: reading historical data from stdin...");
+            DataReader batchReader = new DataParser() {
+                @Override
+                public void streamData(DataStorage s, String uri) {
+                    // no‐op for batch
+                }
+            };
+            batchReader.readData(storage);
+        }
+        else if ("websocket".equalsIgnoreCase(inputMode)) {
+            System.out.println("WebSocket mode: connecting to " + websocketUri);
+            WebSocketDataReader wsReader = new WebSocketDataReader();
+            wsReader.streamData(storage, websocketUri);
+        }
+        else {
+            System.err.println("Unknown input mode '" + inputMode + "', expected batch|websocket");
+            System.exit(1);
+        }
+
+        // 3) Build rule engine with Strategy + Decorator
         AlertDispatcher baseDispatcher     = new ConsoleAlertDispatcher();
         AlertDispatcher priorityDispatcher =
                 new PriorityAlertDispatcherDecorator(baseDispatcher, "HIGH");
@@ -105,17 +131,18 @@ public class HealthDataSimulator {
         AlertGenerator ruleEngine =
                 new AlertGenerator(storage, strategies, priorityDispatcher);
 
-        // 3) Composite for data persistence
+        // 4) Composite for data persistence
         OutputStrategy compositeStrategy =
                 new CompositeOutputStrategy(baseOutputStrategy, storage);
 
-        // 4) Schedule data generators
+        // 5) Schedule our simulated data generators (optional)
+        System.out.printf("Scheduling data generators for %d patients%n", patientCount);
         scheduler = Executors.newScheduledThreadPool(patientCount * 4);
         List<Integer> patientIds = initializePatientIds(patientCount);
         Collections.shuffle(patientIds);
         scheduleDataTasks(patientIds, compositeStrategy);
 
-        // 5) Schedule rule evaluation every 30 seconds
+        // 6) Schedule rule evaluation every 30 seconds
         scheduleTask(ruleEngine::evaluateAllPatients, 30, TimeUnit.SECONDS);
     }
 
@@ -145,14 +172,22 @@ public class HealthDataSimulator {
                     System.exit(0);
                     break;
                 case "--patient-count":
-                    if (i + 1 < args.length) {
-                        try {
-                            patientCount = Integer.parseInt(args[++i]);
-                        } catch (NumberFormatException ignored) { }
+                    if (i+1 < args.length) {
+                        patientCount = Integer.parseInt(args[++i]);
+                    }
+                    break;
+                case "--input":
+                    if (i+1 < args.length) {
+                        inputMode = args[++i];
+                    }
+                    break;
+                case "--ws-uri":
+                    if (i+1 < args.length) {
+                        websocketUri = args[++i];
                     }
                     break;
                 case "--output":
-                    if (i + 1 < args.length) {
+                    if (i+1 < args.length) {
                         String o = args[++i];
                         if (o.equals("console")) {
                             baseOutputStrategy = new ConsoleOutputStrategy();
@@ -161,15 +196,11 @@ public class HealthDataSimulator {
                             if (!Files.exists(p)) Files.createDirectories(p);
                             baseOutputStrategy = new FileOutputStrategy(o.substring(5));
                         } else if (o.startsWith("websocket:")) {
-                            try {
-                                int port = Integer.parseInt(o.substring(10));
-                                baseOutputStrategy = new WebSocketOutputStrategy(port);
-                            } catch (NumberFormatException ignored) { }
+                            int port = Integer.parseInt(o.substring(10));
+                            baseOutputStrategy = new WebSocketOutputStrategy(port);
                         } else if (o.startsWith("tcp:")) {
-                            try {
-                                int port = Integer.parseInt(o.substring(4));
-                                baseOutputStrategy = new TcpOutputStrategy(port);
-                            } catch (NumberFormatException ignored) { }
+                            int port = Integer.parseInt(o.substring(4));
+                            baseOutputStrategy = new TcpOutputStrategy(port);
                         }
                     }
                     break;
@@ -183,9 +214,11 @@ public class HealthDataSimulator {
 
     private void printHelp() {
         System.out.println("Usage: java HealthDataSimulator [options]");
-        System.out.println("  -h                       Show help and exit.");
-        System.out.println("  --patient-count <count>  Number of patients (default: 50).");
-        System.out.println("  --output <type>          Output: console | file:<dir> | websocket:<port> | tcp:<port>");
+        System.out.println("  -h                         Show help and exit.");
+        System.out.println("  --patient-count <count>    Number of patients (default: 50).");
+        System.out.println("  --input <batch|websocket>  Ingest mode (default: websocket).");
+        System.out.println("  --ws-uri <uri>             WebSocket URI (default: ws://localhost:8080).");
+        System.out.println("  --output <type>            Output: console | file:<dir> | websocket:<port> | tcp:<port>");
     }
 
     private List<Integer> initializePatientIds(int count) {
