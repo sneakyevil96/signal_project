@@ -1,23 +1,24 @@
 package com.alerts;
-
-import com.data_management.DataStorage;
+import com.alerts.strategy.AlertStrategy;
 import com.data_management.Patient;
+import com.data_management.DataStorage;
 import java.util.List;
 
 public class AlertGenerator {
     private final DataStorage dataStorage;
-    private final List<AlertRule> alertRules;
-    private final AlertDispatcher alertDispatcher;
+    private final List<AlertStrategy> strategies;
+    private final AlertDispatcher dispatcher;
 
-    public AlertGenerator(DataStorage dataStorage, List<AlertRule> alertRules, AlertDispatcher dispatcher) {
-        this.dataStorage = dataStorage;
-        this.alertRules = alertRules;
-        this.alertDispatcher = dispatcher;
+    public AlertGenerator(DataStorage storage, List<AlertStrategy> strategies, AlertDispatcher dispatcher) {
+        this.dataStorage = storage;
+        this.strategies = strategies;
+        this.dispatcher = dispatcher;
     }
+
     public void evaluateAllPatients() {
-        for (Patient patient : dataStorage.getAllPatients()) {
-            for (AlertRule rule : alertRules) {
-                rule.evaluate(patient, alertDispatcher);
+        for (Patient p : dataStorage.getAllPatients()) {
+            for (AlertStrategy strat : strategies) {
+                strat.checkAlert(p, dispatcher);
             }
         }
     }
