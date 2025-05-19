@@ -2,12 +2,14 @@ package com.cardio_generator.outputs;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.server.WebSocketServer;
-
 import java.net.InetSocketAddress;
 
+/**
+ * Sends each record as a CSV line over WebSocket to all clients.
+ */
 public class WebSocketOutputStrategy implements OutputStrategy {
 
-    private WebSocketServer server;
+    private final WebSocketServer server;
 
     public WebSocketOutputStrategy(int port) {
         server = new SimpleWebSocketServer(new InetSocketAddress(port));
@@ -16,16 +18,22 @@ public class WebSocketOutputStrategy implements OutputStrategy {
     }
 
     @Override
-    public void output(int patientId, long timestamp, String label, String data) {
-        String message = String.format("%d,%d,%s,%s", patientId, timestamp, label, data);
-        // Broadcast the message to all connected clients
+    public void output(int patientId, long timestamp, String label, double data) {
+        // Convert the numeric 'data' back to string for transmission
+        String message = String.format("%d,%d,%s,%s",
+                patientId,
+                timestamp,
+                label,
+                Double.toString(data)
+        );
+
+        // Broadcast to all connected clients
         for (WebSocket conn : server.getConnections()) {
             conn.send(message);
         }
     }
 
     private static class SimpleWebSocketServer extends WebSocketServer {
-
         public SimpleWebSocketServer(InetSocketAddress address) {
             super(address);
         }
@@ -42,7 +50,7 @@ public class WebSocketOutputStrategy implements OutputStrategy {
 
         @Override
         public void onMessage(WebSocket conn, String message) {
-            // Not used in this context
+            // Not used
         }
 
         @Override
@@ -52,7 +60,7 @@ public class WebSocketOutputStrategy implements OutputStrategy {
 
         @Override
         public void onStart() {
-            System.out.println("Server started successfully");
+            System.out.println("WebSocket server started successfully");
         }
     }
 }

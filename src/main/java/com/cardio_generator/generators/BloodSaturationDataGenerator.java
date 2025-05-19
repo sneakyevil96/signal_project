@@ -21,17 +21,24 @@ public class BloodSaturationDataGenerator implements PatientDataGenerator {
     public void generate(int patientId, OutputStrategy outputStrategy) {
         try {
             // Simulate blood saturation values
-            int variation = random.nextInt(3) - 1; // -1, 0, or 1 to simulate small fluctuations
+            int variation = random.nextInt(3) - 1; // -1, 0, or 1
             int newSaturationValue = lastSaturationValues[patientId] + variation;
 
-            // Ensure the saturation stays within a realistic and healthy range
+            // Clamp between 90 and 100
             newSaturationValue = Math.min(Math.max(newSaturationValue, 90), 100);
             lastSaturationValues[patientId] = newSaturationValue;
-            outputStrategy.output(patientId, System.currentTimeMillis(), "Saturation",
-                    Double.toString(newSaturationValue) + "%");
+
+            // Use current time for timestamp
+            long timestamp = System.currentTimeMillis();
+            // Send the raw numeric value (double)
+            outputStrategy.output(patientId,
+                    timestamp,
+                    "Saturation",
+                    (double) newSaturationValue);
         } catch (Exception e) {
             System.err.println("An error occurred while generating blood saturation data for patient " + patientId);
-            e.printStackTrace(); // This will print the stack trace to help identify where the error occurred.
+            e.printStackTrace();
         }
     }
+
 }
