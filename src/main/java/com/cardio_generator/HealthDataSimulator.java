@@ -52,7 +52,7 @@ public class HealthDataSimulator {
 
     /**
      * Wraps any OutputStrategy so that, in addition to emitting,
-     * we also feed all non‐Alert records into our DataStorage.
+     * we also feed all non-Alert records into our DataStorage.
      */
     private class CompositeOutputStrategy implements OutputStrategy {
         private final OutputStrategy delegate;
