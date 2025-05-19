@@ -11,10 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import com.alerts.AlertGenerator;
 import com.alerts.AlertDispatcher;
 import com.alerts.ConsoleAlertDispatcher;
+import com.alerts.decorator.RepeatedAlertStrategyDecorator;
+import com.alerts.decorator.PriorityAlertDispatcherDecorator;
 import com.alerts.strategy.AlertStrategy;
 import com.alerts.strategy.BloodPressureStrategy;
 import com.alerts.strategy.HeartRateStrategy;
@@ -34,84 +37,107 @@ import com.data_management.DataStorage;
 
 public class HealthDataSimulator {
 
-    private static int patientCount = 50;
-    private static ScheduledExecutorService scheduler;
-    private static OutputStrategy baseOutputStrategy = new ConsoleOutputStrategy();
-    private static final Random random = new Random();
+    // --- Singleton plumbing ---
+    private static final HealthDataSimulator INSTANCE = new HealthDataSimulator();
+    private HealthDataSimulator() {}
+    public static HealthDataSimulator getInstance() {
+        return INSTANCE;
+    }
+
+    // --- Instance fields ---
+    private int patientCount = 50;
+    private ScheduledExecutorService scheduler;
+    private OutputStrategy baseOutputStrategy = new ConsoleOutputStrategy();
+    private final Random random = new Random();
 
     /**
      * Wraps any OutputStrategy so that, in addition to emitting,
      * we also feed all non‐Alert records into our DataStorage.
      */
-    private static class CompositeOutputStrategy implements OutputStrategy {
+    private class CompositeOutputStrategy implements OutputStrategy {
         private final OutputStrategy delegate;
         private final DataStorage storage;
 
-        public CompositeOutputStrategy(OutputStrategy delegate, DataStorage storage) {
+        CompositeOutputStrategy(OutputStrategy delegate, DataStorage storage) {
             this.delegate  = delegate;
             this.storage   = storage;
         }
 
         @Override
         public void output(int patientId, long timestamp, String recordType, double measurement) {
-            // first emit
             delegate.output(patientId, timestamp, recordType, measurement);
-            // then store if it's not an Alert
             if (!"Alert".equalsIgnoreCase(recordType)) {
                 storage.addPatientData(patientId, measurement, recordType, timestamp);
             }
         }
     }
 
+    /**
+     * Entry point: just hands off to the singleton instance.
+     */
     public static void main(String[] args) throws IOException {
+        getInstance().start(args);
+    }
+
+    /**
+     * Configures everything, schedules generators & the rule engine.
+     */
+    public void start(String[] args) throws IOException {
         parseArguments(args);
 
-        // 1) Use singleton DataStorage
+        // 1) singleton DataStorage
         DataStorage storage = DataStorage.getInstance();
 
-        // 2) Build our rule engine using the new Strategy pattern
-        AlertDispatcher ruleDispatcher = new ConsoleAlertDispatcher();
-        List<AlertStrategy> strategies = List.of(
+        // 2) Build rule engine with Strategy + Decorator
+        AlertDispatcher baseDispatcher     = new ConsoleAlertDispatcher();
+        AlertDispatcher priorityDispatcher =
+                new PriorityAlertDispatcherDecorator(baseDispatcher, "HIGH");
+
+        List<AlertStrategy> rawStrategies = List.of(
                 new BloodPressureStrategy(),
                 new HeartRateStrategy(),
                 new OxygenSaturationStrategy()
         );
-        AlertGenerator ruleEngine = new AlertGenerator(storage, strategies, ruleDispatcher);
+        List<AlertStrategy> strategies = rawStrategies.stream()
+                .map(s -> new RepeatedAlertStrategyDecorator(s, 10, TimeUnit.MINUTES))
+                .collect(Collectors.toList());
 
-        // 3) Composite strategy for data generators
+        AlertGenerator ruleEngine =
+                new AlertGenerator(storage, strategies, priorityDispatcher);
+
+        // 3) Composite for data persistence
         OutputStrategy compositeStrategy =
                 new CompositeOutputStrategy(baseOutputStrategy, storage);
 
-        // 4) Schedule everything
+        // 4) Schedule data generators
         scheduler = Executors.newScheduledThreadPool(patientCount * 4);
         List<Integer> patientIds = initializePatientIds(patientCount);
         Collections.shuffle(patientIds);
-
         scheduleDataTasks(patientIds, compositeStrategy);
 
-        // 5) Evaluate rules on all patients every 30 seconds
+        // 5) Schedule rule evaluation every 30 seconds
         scheduleTask(ruleEngine::evaluateAllPatients, 30, TimeUnit.SECONDS);
     }
 
-    private static void scheduleDataTasks(List<Integer> patientIds, OutputStrategy strategy) {
+    private void scheduleDataTasks(List<Integer> patientIds, OutputStrategy strategy) {
         ECGDataGenerator            ecgGen = new ECGDataGenerator(patientCount);
         BloodSaturationDataGenerator satGen = new BloodSaturationDataGenerator(patientCount);
         BloodPressureDataGenerator   bpGen  = new BloodPressureDataGenerator(patientCount);
         BloodLevelsDataGenerator     lvlGen = new BloodLevelsDataGenerator(patientCount);
 
         for (int pid : patientIds) {
-            scheduleTask(() -> ecgGen.generate(pid, strategy), 1, TimeUnit.SECONDS);
-            scheduleTask(() -> satGen.generate(pid, strategy), 1, TimeUnit.SECONDS);
-            scheduleTask(() -> bpGen.generate(pid, strategy), 1, TimeUnit.MINUTES);
-            scheduleTask(() -> lvlGen.generate(pid, strategy), 2, TimeUnit.MINUTES);
+            scheduleTask(() -> ecgGen.generate(pid, strategy),     1, TimeUnit.SECONDS);
+            scheduleTask(() -> satGen.generate(pid, strategy),     1, TimeUnit.SECONDS);
+            scheduleTask(() -> bpGen.generate(pid, strategy),      1, TimeUnit.MINUTES);
+            scheduleTask(() -> lvlGen.generate(pid, strategy),     2, TimeUnit.MINUTES);
         }
     }
 
-    private static void scheduleTask(Runnable task, long period, TimeUnit unit) {
+    private void scheduleTask(Runnable task, long period, TimeUnit unit) {
         scheduler.scheduleAtFixedRate(task, random.nextInt(5), period, unit);
     }
 
-    private static void parseArguments(String[] args) throws IOException {
+    private void parseArguments(String[] args) throws IOException {
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "-h":
@@ -155,14 +181,14 @@ public class HealthDataSimulator {
         }
     }
 
-    private static void printHelp() {
+    private void printHelp() {
         System.out.println("Usage: java HealthDataSimulator [options]");
         System.out.println("  -h                       Show help and exit.");
         System.out.println("  --patient-count <count>  Number of patients (default: 50).");
         System.out.println("  --output <type>          Output: console | file:<dir> | websocket:<port> | tcp:<port>");
     }
 
-    private static List<Integer> initializePatientIds(int count) {
+    private List<Integer> initializePatientIds(int count) {
         List<Integer> ids = new ArrayList<>();
         for (int i = 1; i <= count; i++) ids.add(i);
         return ids;

@@ -1,20 +1,21 @@
 package com.alerts;
 
+import com.alerts.strategy.AlertStrategy;
 import com.data_management.DataStorage;
 import com.data_management.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
 class AlertGeneratorTest {
 
     private DataStorage storage;
-    private AlertRule rule1;
-    private AlertRule rule2;
+    private AlertStrategy strategy1;
+    private AlertStrategy strategy2;
     private AlertDispatcher dispatcher;
     private AlertGenerator generator;
     private Patient patient;
@@ -25,27 +26,29 @@ class AlertGeneratorTest {
         storage    = mock(DataStorage.class);
         dispatcher = mock(AlertDispatcher.class);
 
-        // 2) create two dummy rules
-        rule1 = mock(AlertRule.class);
-        rule2 = mock(AlertRule.class);
+        // 2) create two dummy strategies
+        strategy1 = mock(AlertStrategy.class);
+        strategy2 = mock(AlertStrategy.class);
 
         // 3) pretend storage has exactly one patient
         patient = new Patient(96);
-        when(storage.getAllPatients()).thenReturn(Arrays.asList(patient));
+        when(storage.getAllPatients()).thenReturn(List.of(patient));
 
         // 4) instantiate the engine with our mocks
-        generator = new AlertGenerator(storage,
-                Arrays.asList(rule1, rule2),
-                dispatcher);
+        generator = new AlertGenerator(
+                storage,
+                Arrays.asList(strategy1, strategy2),
+                dispatcher
+        );
     }
 
     @Test
-    void testEvaluateAllPatientsInvokesEveryRuleOnce() {
+    void testEvaluateAllPatientsInvokesEveryStrategyOnce() {
         // Act
         generator.evaluateAllPatients();
 
-        // Assert: each rule should be evaluated exactly once on our single patient
-        verify(rule1, times(1)).evaluate(patient, dispatcher);
-        verify(rule2, times(1)).evaluate(patient, dispatcher);
+        // Assert: each strategy should be invoked exactly once for our single patient
+        verify(strategy1, times(1)).checkAlert(patient, dispatcher);
+        verify(strategy2, times(1)).checkAlert(patient, dispatcher);
     }
 }

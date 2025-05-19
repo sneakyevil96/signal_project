@@ -1,32 +1,23 @@
 package com.data_management;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Singleton class for storing patient records in memory.
+ * Singleton in‐memory storage of patient data.
  */
 public class DataStorage {
+    private static DataStorage instance;
+
     private final List<PatientRecord> records;
     private final Map<Integer, Patient> patients;
 
-    // Singleton instance
-    private static DataStorage instance;
-
-    /**
-     * Private constructor to prevent direct instantiation.
-     */
     private DataStorage() {
         this.records = new ArrayList<>();
         this.patients = new HashMap<>();
     }
 
     /**
-     * Get the single instance of DataStorage.
-     *
-     * @return the shared DataStorage instance
+     * Returns the singleton instance.
      */
     public static synchronized DataStorage getInstance() {
         if (instance == null) {
@@ -36,47 +27,37 @@ public class DataStorage {
     }
 
     /**
-     * Adds a new data point for a patient.
-     *
-     * @param patientId        unique identifier of the patient
-     * @param measurementValue the value of the measurement
-     * @param recordType       the type of measurement (e.g., "Systolic", "OxygenSaturation")
-     * @param timestamp        the timestamp of the measurement in ms since epoch
+     * Clears all stored data. Useful for resetting state in tests.
      */
-    public void addPatientData(int patientId, double measurementValue, String recordType, long timestamp) {
+    public void clear() {
+        records.clear();
+        patients.clear();
+    }
+
+    public void addPatientData(int patientId,
+                               double measurementValue,
+                               String recordType,
+                               long timestamp) {
         PatientRecord record = new PatientRecord(patientId, measurementValue, recordType, timestamp);
         records.add(record);
-
-        patients.putIfAbsent(patientId, new Patient(patientId));
-        patients.get(patientId).addRecord(measurementValue, recordType, timestamp);
+        patients
+                .computeIfAbsent(patientId, Patient::new)
+                .addRecord(measurementValue, recordType, timestamp);
     }
 
-    /**
-     * Retrieve all patients currently stored.
-     *
-     * @return a list of Patient objects
-     */
     public List<Patient> getAllPatients() {
-        return new ArrayList<>(this.patients.values());
+        return new ArrayList<>(patients.values());
     }
 
-    /**
-     * Retrieve all records for a patient within a time window.
-     *
-     * @param patientId the patient ID
-     * @param startTime inclusive start of time window (ms since epoch)
-     * @param endTime   inclusive end of time window (ms since epoch)
-     * @return list of PatientRecord in the specified window
-     */
     public List<PatientRecord> getRecords(int patientId, long startTime, long endTime) {
-        List<PatientRecord> filtered = new ArrayList<>();
-        for (PatientRecord record : records) {
-            if (record.getPatientId() == patientId
-                    && record.getTimestamp() >= startTime
-                    && record.getTimestamp() <= endTime) {
-                filtered.add(record);
+        List<PatientRecord> out = new ArrayList<>();
+        for (PatientRecord r : records) {
+            if (r.getPatientId() == patientId
+                    && r.getTimestamp() >= startTime
+                    && r.getTimestamp() <= endTime) {
+                out.add(r);
             }
         }
-        return filtered;
+        return out;
     }
 }

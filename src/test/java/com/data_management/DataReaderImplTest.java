@@ -12,30 +12,28 @@ class DataReaderImplTest {
 
     @Test
     void testReadDataPopulatesDataStorage() {
-        // Simulate two patient lines, then a blank line to stop
+        // 1) Prepare fake stdin with two lines + blank
         String input =
                 "1,100.0,systolic,1714376789000\n" +
                         "2,200.0,diastolic,1714376789001\n" +
                         "\n";
 
-        // Backup & replace System.in
-        InputStream originalIn = System.in;
+        InputStream oldIn = System.in;
         System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
 
-        // Run parser
-        DataStorage storage = new DataStorage(null);
-        DataParser parser     = new DataParser();
+        // 2) Reset and use the singleton storage
+        DataStorage storage = DataStorage.getInstance();
+        storage.clear();
+
+        // 3) Run the parser
+        DataParser parser = new DataParser();
         parser.readData(storage);
 
-        // Restore System.in
-        System.setIn(originalIn);
+        // 4) Restore stdin
+        System.setIn(oldIn);
 
-        // Verify we saw two distinct patients
-        assertNotNull(storage, "Storage should not be null");
-        assertEquals(
-                2,
-                storage.getAllPatients().size(),
-                "Should detect exactly two distinct patients"
-        );
+        // 5) Assert two distinct patients were created
+        assertEquals(2, storage.getAllPatients().size(),
+                "Should detect exactly two distinct patients");
     }
 }
