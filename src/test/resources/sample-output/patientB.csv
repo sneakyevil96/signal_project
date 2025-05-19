@@ -1,0 +1,2 @@
+patientId,timestamp,systolic,diastolic,saturation,heartRate
+patientB,1714376789001,118,79,97,72

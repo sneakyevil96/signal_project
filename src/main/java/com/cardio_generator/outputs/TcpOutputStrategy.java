@@ -6,6 +6,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 
+/**
+ * Sends each record over a plain TCP socket to a single connected client.
+ */
 public class TcpOutputStrategy implements OutputStrategy {
 
     private ServerSocket serverSocket;
@@ -17,7 +20,7 @@ public class TcpOutputStrategy implements OutputStrategy {
             serverSocket = new ServerSocket(port);
             System.out.println("TCP Server started on port " + port);
 
-            // Accept clients in a new thread to not block the main thread
+            // Accept one client connection asynchronously
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
                     clientSocket = serverSocket.accept();
@@ -33,9 +36,15 @@ public class TcpOutputStrategy implements OutputStrategy {
     }
 
     @Override
-    public void output(int patientId, long timestamp, String label, String data) {
+    public void output(int patientId, long timestamp, String label, double data) {
         if (out != null) {
-            String message = String.format("%d,%d,%s,%s", patientId, timestamp, label, data);
+            String message = String.format(
+                    "%d,%d,%s,%s",
+                    patientId,
+                    timestamp,
+                    label,
+                    Double.toString(data)
+            );
             out.println(message);
         }
     }

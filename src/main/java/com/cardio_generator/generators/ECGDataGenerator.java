@@ -19,7 +19,8 @@ public class ECGDataGenerator implements PatientDataGenerator {
     public void generate(int patientId, OutputStrategy outputStrategy) {
         try {
             double ecgValue = simulateEcgWaveform(patientId, lastEcgValues[patientId]);
-            outputStrategy.output(patientId, System.currentTimeMillis(), "ECG", Double.toString(ecgValue));
+            long timestamp = System.currentTimeMillis();
+            outputStrategy.output(patientId, timestamp, "ECG", ecgValue);
             lastEcgValues[patientId] = ecgValue;
         } catch (Exception e) {
             System.err.println("An error occurred while generating ECG data for patient " + patientId);

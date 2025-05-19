@@ -34,8 +34,8 @@ public class BloodPressureDataGenerator implements PatientDataGenerator {
             lastSystolicValues[patientId] = newSystolicValue;
             lastDiastolicValues[patientId] = newDiastolicValue;
 
-            outputStrategy.output(patientId, System.currentTimeMillis(), "SystolicPressure", Double.toString(newSystolicValue));
-            outputStrategy.output(patientId, System.currentTimeMillis(), "DiastolicPressure", Double.toString(newDiastolicValue));
+            outputStrategy.output(patientId, System.currentTimeMillis(), "SystolicPressure", (double) newSystolicValue);
+            outputStrategy.output(patientId, System.currentTimeMillis(), "DiastolicPressure", (double) newDiastolicValue);
         } catch (Exception e) {
             System.err.println("An error occurred while generating blood pressure data for patient " + patientId);
             e.printStackTrace(); // This will print the stack trace to help identify where the error occurred.
