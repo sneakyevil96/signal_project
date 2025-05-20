@@ -9,15 +9,11 @@ public class BloodOxygenAlertFactory extends AlertFactory {
 /**
  * Executes the createAlert operation.
  * @param Alert Alert.
- * @param patientId Patienid.
+ * @param patientId Patient.
  * @param condition Condition.
  * @param timestamp Timestamp.
  */
     public Alert createAlert(String patientId, String condition, long timestamp) {
-        return new Alert(
-                patientId,
-                "[O2] " + condition,
-                timestamp
-        );
+        return new Alert(patientId,"[O2] " + condition, timestamp);
     }
 }
