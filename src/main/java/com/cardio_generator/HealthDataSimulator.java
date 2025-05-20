@@ -77,7 +77,7 @@ public class HealthDataSimulator {
         }
     }
 
-    /** Entry point */
+    //Entry point
     public static void main(String[] args) throws IOException {
         System.out.println(">>> HealthDataSimulator starting up…");
         getInstance().start(args);
@@ -106,8 +106,8 @@ public class HealthDataSimulator {
         }
         else if ("websocket".equalsIgnoreCase(inputMode)) {
             System.out.println("WebSocket mode: connecting to " + websocketUri);
-            WebSocketDataReader wsReader = new WebSocketDataReader();
-            wsReader.streamData(storage, websocketUri);
+            //WebSocketDataReader wsReader = new WebSocketDataReader();
+            //wsReader.streamData(storage, websocketUri);
         }
         else {
             System.err.println("Unknown input mode '" + inputMode + "', expected batch|websocket");

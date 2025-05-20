@@ -48,23 +48,7 @@ public class WebSocketDataReader implements DataReader {
 
             @Override
             public void onMessage(String message) {
-                // parse & store (same as before)…
-                String[] parts = message.split(",", 4);
-                if (parts.length < 4) {
-                    System.err.println("Malformed message: " + message);
-                    return;
-                }
-                try {
-                    int patientId      = Integer.parseInt(parts[0]);
-                    long timestamp     = Long.parseLong(parts[1]);
-                    String recordType  = parts[2];
-                    double measurement = Double.parseDouble(parts[3]);
-                    if (!"Alert".equalsIgnoreCase(recordType)) {
-                        storage.addPatientData(patientId, measurement, recordType, timestamp);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error parsing message '" + message + "': " + e.getMessage());
-                }
+                handleMessage(message, storage);
             }
 
             @Override
@@ -83,11 +67,36 @@ public class WebSocketDataReader implements DataReader {
         client.connect();
     }
 
+    /**
+     * Parses and stores a single incoming message. Used for testability.
+     */
+    protected void handleMessage(String message, DataStorage storage) {
+        String[] parts = message.split(",", 4);
+        if (parts.length < 4) {
+            System.err.println("Malformed message: " + message);
+            return;
+        }
+        try {
+            int patientId = Integer.parseInt(parts[0]);
+            long timestamp = Long.parseLong(parts[1]);
+            String recordType = parts[2];
+            double measurement = Double.parseDouble(parts[3]);
+            if (!"Alert".equalsIgnoreCase(recordType)) {
+                storage.addPatientData(patientId, measurement, recordType, timestamp);
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing message '" + message + "': " + e.getMessage());
+        }
+    }
+
     private void scheduleReconnect(DataStorage storage) {
         attempt++;
         long delay = Math.min(60, (long) Math.pow(2, attempt));
         System.out.printf("Scheduling reconnect in %d seconds…%n", delay);
-        retryScheduler.schedule(() -> connect(storage), delay, TimeUnit.SECONDS);
+
+        if (!retryScheduler.isShutdown()) {
+            retryScheduler.schedule(() -> connect(storage), delay, TimeUnit.SECONDS);
+        }
     }
 
     /** Call to cleanly shut down the WebSocket connection and retries. */
@@ -97,4 +106,5 @@ public class WebSocketDataReader implements DataReader {
             client.close();
         }
     }
+
 }
