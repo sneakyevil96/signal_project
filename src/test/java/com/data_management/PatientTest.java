@@ -52,4 +52,12 @@ class PatientTest {
                 "Returned record should match the requested timestamp"
         );
     }
+
+    @Test
+    void testAddRecordWithFutureTimestamp() {
+        Patient patient = new Patient(1);
+        long future = System.currentTimeMillis() + 10_000_000;
+        patient.addRecord(70.0, "HeartRate", future);
+        assertEquals(1, patient.getRecords(0, future + 1).size());
+    }
 }

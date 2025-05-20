@@ -5,6 +5,7 @@ import com.data_management.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import static org.mockito.Mockito.*;
 /**
@@ -47,5 +48,13 @@ class AlertGeneratorTest {
         // Assert: each strategy should be invoked exactly once for our single patient
         verify(strategy1, times(1)).checkAlert(patient, dispatcher);
         verify(strategy2, times(1)).checkAlert(patient, dispatcher);
+    }
+
+    @Test
+    void testEvaluateAllPatientsWithNoPatients() {
+        when(storage.getAllPatients()).thenReturn(Collections.emptyList());
+        generator.evaluateAllPatients();
+        verify(strategy1, never()).checkAlert(any(), any());
+        verify(strategy2, never()).checkAlert(any(), any());
     }
 }

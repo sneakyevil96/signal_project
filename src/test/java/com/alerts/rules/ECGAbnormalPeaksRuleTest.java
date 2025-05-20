@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -58,4 +59,14 @@ class ECGAbnormalPeaksRuleTest {
                         a.getTimestamp() == spikeTs
         ));
     }
+
+    @Test
+    void testEmptyECGData() {
+        Patient patient = new Patient(1);
+
+        rule.evaluate(patient, dispatcher);
+
+        verify(dispatcher, never()).dispatch(any());
+    }
+
 }

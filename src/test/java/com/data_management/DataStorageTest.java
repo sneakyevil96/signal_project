@@ -67,4 +67,12 @@ class DataStorageTest {
         assertEquals(1, recs.size(), "Only one record falls in [100,200]");
         assertEquals(6.0, recs.get(0).getMeasurementValue(), 1e-6);
     }
+
+    @Test
+    void testAddRecordWithNegativeMeasurement() {
+        DataStorage storage = DataStorage.getInstance();
+        storage.clear();
+        storage.addPatientData(1, -50.0, "HeartRate", System.currentTimeMillis());
+        assertFalse(storage.getAllPatients().isEmpty());
+    }
 }

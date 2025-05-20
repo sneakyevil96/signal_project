@@ -12,9 +12,9 @@ public abstract class AlertStrategyDecorator implements AlertStrategy {
     }
 
     /**
-     * Executes the checkAlert operation.
-     * @param patient Patient.
-     * @param dispatcher Dispatcher.
+     * executes checkAlert operation.
+     * @param patient patient.
+     * @param dispatcher dispatcher.
      */
     @Override
     public void checkAlert(Patient patient, AlertDispatcher dispatcher) {

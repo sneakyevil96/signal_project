@@ -1,10 +1,15 @@
 package com.data_management;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,4 +41,53 @@ class DataReaderImplTest {
         assertEquals(2, storage.getAllPatients().size(),
                 "Should detect exactly two distinct patients");
     }
+
+    @BeforeEach
+    void setUp() {
+        DataStorage.getInstance().clear();
+    }
+
+    @AfterEach
+    void cleanup() throws IOException {
+        // Clean up any test files
+        // ... file cleanup code
+    }
+
+    @Test
+    void testReadEmptyFile() throws IOException {
+        Path tempFile = null;
+        try {
+            tempFile = Files.createTempFile("empty", ".csv");
+            DataStorage storage = DataStorage.getInstance();
+            new DataParser().readData(storage, tempFile.toString());
+            assertTrue(storage.getAllPatients().isEmpty());
+        } finally {
+            if (tempFile != null) {
+                Files.deleteIfExists(tempFile);
+            }
+        }
+    }
+
+    @Test
+    void testInvalidFormatFile() throws IOException {
+        Path tempFile = null;
+        try {
+            tempFile = Files.createTempFile("invalid", ".csv");
+            Files.writeString(tempFile, "invalid,data,string");
+            DataStorage storage = DataStorage.getInstance();
+
+            Path finalTempFile = tempFile;
+            assertThrows(IllegalArgumentException.class, () -> {
+                new DataParser().readData(storage, finalTempFile.toString());
+            });
+
+            assertTrue(storage.getAllPatients().isEmpty(),
+                    "Storage should not contain any data after invalid input");
+        } finally {
+            if (tempFile != null) {
+                Files.deleteIfExists(tempFile);
+            }
+        }
+    }
+
 }

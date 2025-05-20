@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -62,4 +63,21 @@ class RapidOxygenDropRuleTest {
 
         verify(dispatcher, never()).dispatch(any());
     }
+
+    @Test
+    void testRapidOxygenDrop() {
+        Patient patient = new Patient(1);
+        patient.addRecord(98.0, "OxygenSaturation", BASE_TS);
+        patient.addRecord(85.0, "OxygenSaturation", BASE_TS + 2000);
+        patient.addRecord(65.0, "OxygenSaturation", BASE_TS + 4000);
+
+        rule.evaluate(patient, dispatcher);
+
+        verify(dispatcher, times(1)).dispatch(argThat((Alert a) ->
+                a.getPatientId().equals("1") &&
+                        a.getCondition().contains("Rapid oxygen drop detected") &&
+                        a.getTimestamp() == BASE_TS + 4000
+        ));
+    }
+
 }

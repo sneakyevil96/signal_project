@@ -1,9 +1,9 @@
 package com.alerts.decorator;
 import com.alerts.Alert;
 import com.alerts.AlertDispatcher;
-/**
- * Adds priority handling to alert dispatching.
- */
+
+ // Adds priority handling to alert dispatching.
+
 public class PriorityAlertDispatcherDecorator implements AlertDispatcher {
     private final AlertDispatcher delegate;
     private final String priorityTag;

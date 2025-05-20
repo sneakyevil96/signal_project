@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -50,4 +51,19 @@ class LowOxygenRuleTest {
 
         verify(dispatcher, never()).dispatch(any());
     }
+
+    @Test
+    void handlesNegativeOxygenLevel() {
+        Patient patient = new Patient(1);
+        patient.addRecord(-10.0, "OxygenSaturation", TS);
+
+        rule.evaluate(patient, dispatcher);
+
+        verify(dispatcher, times(1)).dispatch(argThat((Alert a) ->
+                a.getPatientId().equals("1") &&
+                        a.getCondition().contains("Low oxygen saturation detected: -10.0%") &&
+                        a.getTimestamp() == TS
+        ));
+    }
+
 }

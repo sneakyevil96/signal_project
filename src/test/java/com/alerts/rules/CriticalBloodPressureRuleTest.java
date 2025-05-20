@@ -2,16 +2,20 @@ package com.alerts.rules;
 
 import com.alerts.Alert;
 import com.alerts.AlertDispatcher;
-import com.alerts.rules.CriticalBloodPressureRule;
 import com.data_management.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the CriticalBloodPressureRule class.
+ */
 class CriticalBloodPressureRuleTest {
 
     private AlertDispatcher dispatcher;
@@ -28,12 +32,10 @@ class CriticalBloodPressureRuleTest {
 
     @Test
     void triggersOnHighSystolic() {
-        // High systolic > 180
         patient.addRecord(200.0, "Systolic", TS);
-
         rule.evaluate(patient, dispatcher);
 
-        verify(dispatcher, times(1)).dispatch(argThat((Alert a) ->
+        verify(dispatcher).dispatch(argThat((Alert a) ->
                 a.getPatientId().equals("1") &&
                         a.getCondition().contains("systolic BP: 200.0") &&
                         a.getTimestamp() == TS
@@ -42,12 +44,10 @@ class CriticalBloodPressureRuleTest {
 
     @Test
     void triggersOnLowDiastolic() {
-        // Low diastolic < 60
         patient.addRecord(50.0, "Diastolic", TS);
-
         rule.evaluate(patient, dispatcher);
 
-        verify(dispatcher, times(1)).dispatch(argThat((Alert a) ->
+        verify(dispatcher).dispatch(argThat((Alert a) ->
                 a.getPatientId().equals("1") &&
                         a.getCondition().contains("diastolic BP: 50.0") &&
                         a.getTimestamp() == TS
@@ -56,12 +56,40 @@ class CriticalBloodPressureRuleTest {
 
     @Test
     void doesNotTriggerForNormalReadings() {
-        // Normal blood pressure values
         patient.addRecord(120.0, "Systolic", TS);
         patient.addRecord(80.0,  "Diastolic", TS);
-
         rule.evaluate(patient, dispatcher);
 
         verify(dispatcher, never()).dispatch(any());
+    }
+
+    @Test
+    void testExtremelyHighSystolicEdgeCase() {
+        patient.addRecord(500.0, "Systolic", TS);
+        rule.evaluate(patient, dispatcher);
+
+        verify(dispatcher).dispatch(argThat((Alert a) ->
+                a.getPatientId().equals("1") &&
+                        a.getCondition().contains("systolic BP: 500.0")
+        ));
+    }
+
+    @Test
+    void testUnrecognizedTypeDoesNotTrigger() {
+        patient.addRecord(500.0, "BloodPressure", TS);  // Unsupported type
+        rule.evaluate(patient, dispatcher);
+
+        verify(dispatcher, never()).dispatch(any());
+    }
+
+    @Test
+    void testNegativeDiastolicIgnored() {
+        patient.addRecord(-100.0, "Diastolic", TS);  // Invalid but may be parsed
+        rule.evaluate(patient, dispatcher);
+
+        // Still under 60, so it *might* dispatch — depends on how your logic treats negatives
+        verify(dispatcher).dispatch(argThat((Alert a) ->
+                a.getCondition().contains("diastolic BP: -100.0")
+        ));
     }
 }

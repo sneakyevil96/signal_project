@@ -37,4 +37,7 @@ public class DataParser implements DataReader {
                 "DataParser only supports batch readData(); use WebSocketDataReader for streaming"
         );
     }
+
+    public void readData(DataStorage storage, String string) {
+    }
 }

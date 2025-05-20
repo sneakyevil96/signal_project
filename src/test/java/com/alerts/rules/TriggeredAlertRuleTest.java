@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -49,4 +50,21 @@ class TriggeredAlertRuleTest {
 
         verify(dispatcher, never()).dispatch(any());
     }
+    @Test
+    void testEvaluateWithNullDispatcher() {
+        Patient patient = new Patient(1);
+        assertThrows(NullPointerException.class, () ->
+                rule.evaluate(patient, null)
+        );
+    }
+
+    @Test
+    void testEvaluateWithNullPatient() {
+        AlertDispatcher dispatcher = mock(AlertDispatcher.class);
+        assertThrows(NullPointerException.class, () ->
+                rule.evaluate(null, dispatcher)
+        );
+    }
+
+
 }
