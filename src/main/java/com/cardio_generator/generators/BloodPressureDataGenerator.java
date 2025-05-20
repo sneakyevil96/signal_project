@@ -1,12 +1,11 @@
 package com.cardio_generator.generators;
-
 import java.util.Random;
-
 import com.cardio_generator.outputs.OutputStrategy;
-
+/**
+ * Generates simulated blood pressure readings for patients.
+ */
 public class BloodPressureDataGenerator implements PatientDataGenerator {
     private static final Random random = new Random();
-
     private int[] lastSystolicValues;
     private int[] lastDiastolicValues;
 
@@ -22,6 +21,11 @@ public class BloodPressureDataGenerator implements PatientDataGenerator {
     }
 
     @Override
+/**
+ * Executes the generate operation.
+ * @param patientId Patientid.
+ * @param outputStrategy Outputstrategy.
+ */
     public void generate(int patientId, OutputStrategy outputStrategy) {
         try {
             int systolicVariation = random.nextInt(5) - 2; // -2, -1, 0, 1, or 2

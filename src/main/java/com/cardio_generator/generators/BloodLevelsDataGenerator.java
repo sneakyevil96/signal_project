@@ -1,8 +1,9 @@
 package com.cardio_generator.generators;
-
 import java.util.Random;
 import com.cardio_generator.outputs.OutputStrategy;
-
+/**
+ * Generates simulated blood level data for patients.
+ */
 public class BloodLevelsDataGenerator implements PatientDataGenerator {
     private static final Random random = new Random();
     private final double[] baselineCholesterol;
@@ -22,6 +23,11 @@ public class BloodLevelsDataGenerator implements PatientDataGenerator {
     }
 
     @Override
+/**
+ * Executes the generate operation.
+ * @param patientId Patientid.
+ * @param outputStrategy Outputstrategy.
+ */
     public void generate(int patientId, OutputStrategy outputStrategy) {
         try {
             double cholesterol = baselineCholesterol[patientId] + (random.nextDouble() - 0.5) * 10;

@@ -1,5 +1,4 @@
 package com.cardio_generator;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
 import com.alerts.AlertGenerator;
 import com.alerts.AlertDispatcher;
 import com.alerts.ConsoleAlertDispatcher;
@@ -22,7 +20,6 @@ import com.alerts.strategy.AlertStrategy;
 import com.alerts.strategy.BloodPressureStrategy;
 import com.alerts.strategy.HeartRateStrategy;
 import com.alerts.strategy.OxygenSaturationStrategy;
-
 import com.cardio_generator.generators.BloodLevelsDataGenerator;
 import com.cardio_generator.generators.BloodPressureDataGenerator;
 import com.cardio_generator.generators.BloodSaturationDataGenerator;
@@ -32,22 +29,22 @@ import com.cardio_generator.outputs.FileOutputStrategy;
 import com.cardio_generator.outputs.OutputStrategy;
 import com.cardio_generator.outputs.TcpOutputStrategy;
 import com.cardio_generator.outputs.WebSocketOutputStrategy;
-
 import com.data_management.DataStorage;
 import com.data_management.WebSocketDataReader;
 import com.data_management.DataReader;
 import com.data_management.DataParser;
-
+/**
+ * Main simulator that configures and runs the full data generation and alert system.
+ */
 public class HealthDataSimulator {
-
-    // --- Singleton plumbing ---
+    // singleton
     private static final HealthDataSimulator INSTANCE = new HealthDataSimulator();
     private HealthDataSimulator() {}
     public static HealthDataSimulator getInstance() {
         return INSTANCE;
     }
 
-    // --- Instance fields ---
+    // instance
     private int patientCount    = 50;
     private String inputMode    = "websocket";     // "batch" or "websocket"
     private String websocketUri = "ws://localhost:8080";
@@ -69,6 +66,13 @@ public class HealthDataSimulator {
         }
 
         @Override
+/**
+ * Executes the output operation.
+ * @param patientId Patientid.
+ * @param timestamp Timestamp.
+ * @param recordType Recordtype.
+ * @param measurement Measurement.
+ */
         public void output(int patientId, long timestamp, String recordType, double measurement) {
             delegate.output(patientId, timestamp, recordType, measurement);
             if (!"Alert".equalsIgnoreCase(recordType)) {
@@ -90,16 +94,21 @@ public class HealthDataSimulator {
     public void start(String[] args) throws IOException {
         parseArguments(args);
 
-        // 1) singleton DataStorage
+        // singleton DataStorage
         DataStorage storage = DataStorage.getInstance();
 
-        // 2) ingest data
+        // ingest data
         if ("batch".equalsIgnoreCase(inputMode)) {
             System.out.println("Batch mode: reading historical data from stdin...");
             DataReader batchReader = new DataParser() {
                 @Override
+/**
+ * Executes the streamData operation.
+ * @param s S.
+ * @param uri Uri.
+ */
                 public void streamData(DataStorage s, String uri) {
-                    // no‐op for batch
+                    // no op for batch
                 }
             };
             batchReader.readData(storage);
@@ -114,49 +123,40 @@ public class HealthDataSimulator {
             System.exit(1);
         }
 
-        // 3) Build rule engine with Strategy + Decorator
-        AlertDispatcher baseDispatcher     = new ConsoleAlertDispatcher();
-        AlertDispatcher priorityDispatcher =
-                new PriorityAlertDispatcherDecorator(baseDispatcher, "HIGH");
+        // Build rule engine with Strategy + Decorator
+        AlertDispatcher baseDispatcher = new ConsoleAlertDispatcher();
+        AlertDispatcher priorityDispatcher = new PriorityAlertDispatcherDecorator(baseDispatcher, "HIGH");
 
-        List<AlertStrategy> rawStrategies = List.of(
-                new BloodPressureStrategy(),
-                new HeartRateStrategy(),
-                new OxygenSaturationStrategy()
-        );
-        List<AlertStrategy> strategies = rawStrategies.stream()
-                .map(s -> new RepeatedAlertStrategyDecorator(s, 10, TimeUnit.MINUTES))
-                .collect(Collectors.toList());
+        List<AlertStrategy> rawStrategies = List.of(new BloodPressureStrategy(), new HeartRateStrategy(), new OxygenSaturationStrategy());
+        List<AlertStrategy> strategies = rawStrategies.stream().map(s -> new RepeatedAlertStrategyDecorator(s, 10, TimeUnit.MINUTES)).collect(Collectors.toList());
 
-        AlertGenerator ruleEngine =
-                new AlertGenerator(storage, strategies, priorityDispatcher);
+        AlertGenerator ruleEngine = new AlertGenerator(storage, strategies, priorityDispatcher);
 
-        // 4) Composite for data persistence
-        OutputStrategy compositeStrategy =
-                new CompositeOutputStrategy(baseOutputStrategy, storage);
+        // Composite for data persistence
+        OutputStrategy compositeStrategy = new CompositeOutputStrategy(baseOutputStrategy, storage);
 
-        // 5) Schedule our simulated data generators (optional)
+        // Schedule our simulated data generators (optional)
         System.out.printf("Scheduling data generators for %d patients%n", patientCount);
         scheduler = Executors.newScheduledThreadPool(patientCount * 4);
         List<Integer> patientIds = initializePatientIds(patientCount);
         Collections.shuffle(patientIds);
         scheduleDataTasks(patientIds, compositeStrategy);
 
-        // 6) Schedule rule evaluation every 30 seconds
+        // Schedule rule evaluation every 30 seconds
         scheduleTask(ruleEngine::evaluateAllPatients, 30, TimeUnit.SECONDS);
     }
 
     private void scheduleDataTasks(List<Integer> patientIds, OutputStrategy strategy) {
-        ECGDataGenerator            ecgGen = new ECGDataGenerator(patientCount);
+        ECGDataGenerator ecgGen = new ECGDataGenerator(patientCount);
         BloodSaturationDataGenerator satGen = new BloodSaturationDataGenerator(patientCount);
-        BloodPressureDataGenerator   bpGen  = new BloodPressureDataGenerator(patientCount);
-        BloodLevelsDataGenerator     lvlGen = new BloodLevelsDataGenerator(patientCount);
+        BloodPressureDataGenerator bpGen = new BloodPressureDataGenerator(patientCount);
+        BloodLevelsDataGenerator lvlGen = new BloodLevelsDataGenerator(patientCount);
 
         for (int pid : patientIds) {
-            scheduleTask(() -> ecgGen.generate(pid, strategy),     1, TimeUnit.SECONDS);
-            scheduleTask(() -> satGen.generate(pid, strategy),     1, TimeUnit.SECONDS);
-            scheduleTask(() -> bpGen.generate(pid, strategy),      1, TimeUnit.MINUTES);
-            scheduleTask(() -> lvlGen.generate(pid, strategy),     2, TimeUnit.MINUTES);
+            scheduleTask(() -> ecgGen.generate(pid, strategy),1, TimeUnit.SECONDS);
+            scheduleTask(() -> satGen.generate(pid, strategy),1, TimeUnit.SECONDS);
+            scheduleTask(() -> bpGen.generate(pid, strategy),1, TimeUnit.MINUTES);
+            scheduleTask(() -> lvlGen.generate(pid, strategy),2, TimeUnit.MINUTES);
         }
     }
 

@@ -1,21 +1,24 @@
-// com/alerts/rules/RapidOxygenDropRule.java
-
 package com.alerts.rules;
-
 import com.alerts.Alert;
 import com.alerts.AlertDispatcher;
 import com.alerts.AlertRule;
 import com.data_management.Patient;
 import com.data_management.PatientRecord;
-
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Detects rapid drops in oxygen saturation over time.
+ */
 public class RapidOxygenDropRule implements AlertRule {
     private static final double DROP_THRESHOLD = 5.0;
     private static final long TIME_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 
     @Override
+/**
+ * Executes the evaluate operation.
+ * @param patient Patient.
+ * @param dispatcher Dispatcher.
+ */
     public void evaluate(Patient patient, AlertDispatcher dispatcher) {
         List<PatientRecord> allRecords = patient.getRecords(0, Long.MAX_VALUE);
 

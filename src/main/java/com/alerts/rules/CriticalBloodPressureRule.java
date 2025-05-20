@@ -6,12 +6,19 @@ import com.alerts.factory.AlertFactory;
 import com.alerts.factory.BloodPressureAlertFactory;
 import com.data_management.Patient;
 import com.data_management.PatientRecord;
-
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Alert strategy to detect critically low or high blood pressure.
+ */
 public class CriticalBloodPressureRule implements AlertRule {
     @Override
+/**
+ * Executes the evaluate operation.
+ * @param patient Patient.
+ * @param dispatcher Dispatcher.
+ */
+
     public void evaluate(Patient patient, AlertDispatcher dispatcher) {
         List<PatientRecord> records = patient.getRecords(0, Long.MAX_VALUE);
         List<PatientRecord> systolic = new ArrayList<>();

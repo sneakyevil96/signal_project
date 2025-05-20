@@ -1,7 +1,9 @@
 package com.alerts.decorator;
 import com.alerts.Alert;
 import com.alerts.AlertDispatcher;
-//Wraps an AlertDispatcher, prefixing each alert’s condition with a priority tag
+/**
+ * Adds priority handling to alert dispatching.
+ */
 public class PriorityAlertDispatcherDecorator implements AlertDispatcher {
     private final AlertDispatcher delegate;
     private final String priorityTag;
@@ -11,6 +13,10 @@ public class PriorityAlertDispatcherDecorator implements AlertDispatcher {
         this.priorityTag = priorityTag;
     }
 
+    /**
+     * Executes the dispatch operation.
+     * @param alert Alert.
+     */
     @Override
     public void dispatch(Alert alert) {
         // Create a new Alert with the same patientId & timestamp but tagged condition

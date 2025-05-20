@@ -1,9 +1,9 @@
 package com.cardio_generator.generators;
-
 import java.util.Random;
-
 import com.cardio_generator.outputs.OutputStrategy;
-
+/**
+ * Generates simulated oxygen saturation data.
+ */
 public class BloodSaturationDataGenerator implements PatientDataGenerator {
     private static final Random random = new Random();
     private int[] lastSaturationValues;
@@ -18,6 +18,11 @@ public class BloodSaturationDataGenerator implements PatientDataGenerator {
     }
 
     @Override
+/**
+ * Executes the generate operation.
+ * @param patientId Patientid.
+ * @param outputStrategy Outputstrategy.
+ */
     public void generate(int patientId, OutputStrategy outputStrategy) {
         try {
             // Simulate blood saturation values

@@ -1,13 +1,13 @@
 package com.cardio_generator.generators;
-
 import java.util.Random;
 import com.cardio_generator.outputs.OutputStrategy;
-
+/**
+ * Generates simulated ECG data signals.
+ */
 public class ECGDataGenerator implements PatientDataGenerator {
     private static final Random random = new Random();
     private double[] lastEcgValues;
     private static final double PI = Math.PI;
-
     public ECGDataGenerator(int patientCount) {
         lastEcgValues = new double[patientCount + 1];
         for (int i = 1; i <= patientCount; i++) {
@@ -16,6 +16,11 @@ public class ECGDataGenerator implements PatientDataGenerator {
     }
 
     @Override
+/**
+ * Executes the generate operation.
+ * @param patientId Patientid.
+ * @param outputStrategy Outputstrategy.
+ */
     public void generate(int patientId, OutputStrategy outputStrategy) {
         try {
             double ecgValue = simulateEcgWaveform(patientId, lastEcgValues[patientId]);
@@ -27,7 +32,6 @@ public class ECGDataGenerator implements PatientDataGenerator {
             e.printStackTrace();
         }
     }
-
     private double simulateEcgWaveform(int patientId, double lastEcgValue) {
         double hr = 60.0 + random.nextDouble() * 20.0;
         double t = System.currentTimeMillis() / 1000.0;

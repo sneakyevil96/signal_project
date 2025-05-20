@@ -1,22 +1,26 @@
-// com/alerts/rules/HypotensiveHypoxemiaRule.java
-
 package com.alerts.rules;
-
 import com.alerts.Alert;
 import com.alerts.AlertDispatcher;
 import com.alerts.AlertRule;
 import com.data_management.Patient;
 import com.data_management.PatientRecord;
-
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Detects combined low blood pressure and low oxygen saturation.
+ */
 public class HypotensiveHypoxemiaRule implements AlertRule {
     private static final double SYSTOLIC_THRESHOLD = 90.0;
     private static final double OXYGEN_THRESHOLD = 92.0;
     private static final long TIME_TOLERANCE_MS = 60 * 1000; // allow up to 1 minute timestamp difference
 
     @Override
+/**
+ * Executes the evaluate operation.
+ * @param patient Patient.
+ * @param dispatcher Dispatcher.
+ */
+
     public void evaluate(Patient patient, AlertDispatcher dispatcher) {
         List<PatientRecord> records = patient.getRecords(0, Long.MAX_VALUE);
 
@@ -43,11 +47,11 @@ public class HypotensiveHypoxemiaRule implements AlertRule {
 
                         dispatcher.dispatch(new Alert(
                                 String.valueOf(patient.getId()),
-                                "Hypotensive Hypoxemia Alert: SBP=" + bp.getMeasurementValue() +
+                                "Hypotensive Hypoxemia Alert: SBP = " + bp.getMeasurementValue() +
                                         ", SpO2=" + ox.getMeasurementValue(),
                                 Math.max(bpTime, ox.getTimestamp())
                         ));
-                        break; // avoid duplicate alerts for the same BP reading
+                        break; // avoid duplicate alerts for the same bp reading
                     }
                 }
             }

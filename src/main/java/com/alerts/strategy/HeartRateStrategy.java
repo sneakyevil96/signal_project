@@ -5,10 +5,17 @@ import com.alerts.factory.ECGAlertFactory;
 import com.data_management.Patient;
 import com.data_management.PatientRecord;
 import java.util.List;
-
+/**
+ * Strategy to detect abnormal heart rate values.
+ */
 public class HeartRateStrategy implements AlertStrategy {
     private final AlertFactory factory = new ECGAlertFactory();
 
+    /**
+     * Executes the checkAlert operation.
+     * @param patient Patient.
+     * @param dispatcher Dispatcher.
+     */
     @Override
     public void checkAlert(Patient patient, AlertDispatcher dispatcher) {
         List<PatientRecord> recs = patient.getRecords(0, Long.MAX_VALUE);

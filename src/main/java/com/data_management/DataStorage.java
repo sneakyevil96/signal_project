@@ -1,9 +1,7 @@
 package com.data_management;
-
 import java.util.*;
-
 /**
- * Singleton in‐memory storage of patient data.
+ * Singleton class that stores patient data and records.
  */
 public class DataStorage {
     private static DataStorage instance;
@@ -15,7 +13,6 @@ public class DataStorage {
         this.records = new ArrayList<>();
         this.patients = new HashMap<>();
     }
-
     /**
      * Returns the singleton instance.
      */
@@ -28,6 +25,7 @@ public class DataStorage {
 
     /**
      * Clears all stored data. Useful for resetting state in tests.
+     * Executes the clear operation.
      */
     public void clear() {
         records.clear();
@@ -44,11 +42,21 @@ public class DataStorage {
                 .computeIfAbsent(patientId, Patient::new)
                 .addRecord(measurementValue, recordType, timestamp);
     }
-
+    /**
+     * Executes the getAllPatients operation.
+     * @return a List of patients.
+     */
     public List<Patient> getAllPatients() {
         return new ArrayList<>(patients.values());
     }
 
+    /**
+     * Executes the getRecords operation.
+     * @return List of patient records.
+     * @param patientId PatientId.
+     * @param startTime StartTime.
+     * @param endTime Endtime.
+     */
     public List<PatientRecord> getRecords(int patientId, long startTime, long endTime) {
         List<PatientRecord> out = new ArrayList<>();
         for (PatientRecord r : records) {

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Connects to a WebSocket server streaming lines of the form:
- *   patientId,timestamp,label,value
+ * patientId,timestamp,label,value
  * and pushes each parsed record into the provided DataStorage.
  */
 public class RealTimeDataClient extends WebSocketClient implements LiveDataReader {

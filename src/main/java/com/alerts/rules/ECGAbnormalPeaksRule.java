@@ -1,20 +1,25 @@
 package com.alerts.rules;
-
 import com.alerts.Alert;
 import com.alerts.AlertDispatcher;
 import com.alerts.AlertRule;
 import com.data_management.Patient;
 import com.data_management.PatientRecord;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-
+/**
+ * Strategy for detecting abnormal ECG peaks.
+ */
 public class ECGAbnormalPeaksRule implements AlertRule {
     private static final int WINDOW_SIZE = 5;
     private static final double THRESHOLD = 20.0; // units above moving average
 
     @Override
+/**
+ * Executes the evaluate operation.
+ * @param patient Patient.
+ * @param dispatcher Dispatcher.
+ */
     public void evaluate(Patient patient, AlertDispatcher dispatcher) {
         List<PatientRecord> records = patient.getRecords(0, Long.MAX_VALUE);
         Deque<Double> window = new ArrayDeque<>();
